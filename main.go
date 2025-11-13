@@ -5,10 +5,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
+	"os"
 )
 
 func main() {
-	dbURL := "postgres://user:password@localhost:5432/reviewer_db?sslmode=disable"
+	dbURL := os.Getenv("DATABASE_URL")
 	db, err := sqlx.Connect("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("could not connect to database: %v", err)
