@@ -18,6 +18,30 @@ func NewHandler(s *service.Service) *Handler {
 	return &Handler{service: s}
 }
 
+func (h *Handler) AddNewUser(c *gin.Context) {
+	var user domain.User
+	body, _ := c.GetRawData()
+	if err := json.Unmarshal(body, &user); err != nil {
+		writeError(c, http.StatusBadRequest, "INVALID_JSON", fmt.Sprintf("Invalid JSON: %v", err))
+		return
+	}
+	createdUser, err := h.service.AddNewUser(&user)
+	if err != nil {
+		if strings.Contains(err.Error(), "team not found") {
+			writeError(c, http.StatusNotFound, "TEAM_NOT_FOUND", "team not found")
+			return
+		}
+		if strings.Contains(err.Error(), "user already exists") {
+			writeError(c, http.StatusConflict, "USER_EXISTS", "user already exists")
+			return
+		}
+		writeError(c, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, createdUser)
+}
+
 func (h *Handler) GetUser(c *gin.Context) {
 	userID := c.Param("id")
 	if userID == "" {

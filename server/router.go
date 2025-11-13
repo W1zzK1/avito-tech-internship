@@ -35,6 +35,7 @@ func (s *Server) setupRouter() {
 
 	users := s.router.Group("/users")
 	{
+		users.POST("/addNew", httpHandler.AddNewUser)
 		users.GET("/users/:id", httpHandler.GetUser)
 		users.POST("/setIsActive", httpHandler.SetUserActive)
 	}

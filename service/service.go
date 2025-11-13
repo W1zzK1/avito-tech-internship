@@ -14,6 +14,14 @@ func NewService(repo storage.Repository) *Service {
 }
 
 // Users
+func (service *Service) AddNewUser(user *domain.User) (*domain.User, error) {
+	user, err := service.repo.AddNewUser(user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func (service *Service) GetUser(id string) (*domain.User, error) {
 	user, err := service.repo.GetUserByID(id)
 	if err != nil {

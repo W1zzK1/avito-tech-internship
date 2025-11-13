@@ -13,6 +13,7 @@ type Repository interface {
 	// Users
 	GetUserByID(userId string) (*domain.User, error)
 	SetUserActive(userId string, isActive bool) error
+	AddNewUser(user *domain.User) (*domain.User, error)
 
 	//Teams
 	AddTeam(team *domain.Team) error
@@ -28,6 +29,35 @@ func NewPostgresRepository(db *sqlx.DB) *PostgresRepository {
 }
 
 // Users
+func (r *PostgresRepository) AddNewUser(user *domain.User) (*domain.User, error) {
+	var teamID string
+	err := r.db.Get(&teamID, "SELECT id FROM teams WHERE name = $1", user.TeamName)
+	if err != nil {
+		return nil, fmt.Errorf("team not found: %w", err)
+	}
+
+	query := `
+        INSERT INTO users (id, username, is_active, team_id) 
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, username, is_active, team_id
+    `
+
+	var newUser domain.User
+	err = r.db.QueryRow(query, user.UserId, user.Username, user.IsActive, teamID).
+		Scan(&newUser.UserId, &newUser.Username, &newUser.IsActive, &newUser.TeamId)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "unique constraint") {
+			return nil, fmt.Errorf("user already exists")
+		}
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	newUser.TeamName = user.TeamName
+
+	return &newUser, nil
+}
+
 func (r *PostgresRepository) GetUserByID(userID string) (*domain.User, error) {
 	var user domain.User
 	query := "SELECT * FROM users WHERE id = $1"
