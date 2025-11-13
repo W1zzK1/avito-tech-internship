@@ -13,10 +13,18 @@ func NewService(repo storage.Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (service *Service) GetUser(id int) (*domain.User, error) {
+func (service *Service) GetUser(id string) (*domain.User, error) {
 	user, err := service.repo.GetUserByID(id)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (service *Service) SetUserActive(userID string, isActive bool) (*domain.User, error) {
+	err := service.repo.SetUserActive(userID, isActive)
+	if err != nil {
+		return nil, err
+	}
+	return service.repo.GetUserByID(userID)
 }

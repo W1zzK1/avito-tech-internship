@@ -27,7 +27,17 @@ func (s *Server) setupRouter() {
 	appService := service.NewService(repository)
 	httpHandler := NewHandler(appService)
 
-	s.router.GET("/users/:id", httpHandler.GetUser)
+	teams := s.router.Group("/teams")
+	{
+		teams.POST("/add")
+		teams.GET("/get")
+	}
+
+	users := s.router.Group("/users")
+	{
+		users.GET("/users/:id", httpHandler.GetUser)
+		users.POST("/setIsActive", httpHandler.SetUserActive)
+	}
 
 	s.router.GET("/health", func(c *gin.Context) {
 		if err := s.db.Ping(); err != nil {

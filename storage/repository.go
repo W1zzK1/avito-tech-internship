@@ -9,8 +9,11 @@ import (
 )
 
 type Repository interface {
-	GetUserByID(userId int) (*domain.User, error)
-	//GetUserWithTeam(userId string) (*domain.User, error)
+	// Users
+	GetUserByID(userId string) (*domain.User, error)
+	SetUserActive(userId string, isActive bool) error
+
+	//AddTeam()
 }
 
 type PostgresRepository struct {
@@ -21,10 +24,10 @@ func NewPostgresRepository(db *sqlx.DB) *PostgresRepository {
 	return &PostgresRepository{db: db}
 }
 
-func (r *PostgresRepository) GetUserByID(userID int) (*domain.User, error) {
+// Users
+func (r *PostgresRepository) GetUserByID(userID string) (*domain.User, error) {
 	var user domain.User
-	println(userID)
-	query := "SELECT * FROM users WHERE user_id = $1"
+	query := "SELECT * FROM users WHERE id = $1"
 	err := r.db.Get(&user, query, userID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, err
@@ -34,4 +37,17 @@ func (r *PostgresRepository) GetUserByID(userID int) (*domain.User, error) {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 	return &user, err
+}
+
+func (r *PostgresRepository) SetUserActive(userID string, iaActive bool) error {
+	query := "UPDATE users SET is_active = $1 WHERE id = $2"
+	result, err := r.db.Exec(query, iaActive, userID)
+	if err != nil {
+		return err
+	}
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		return fmt.Errorf("user was not found")
+	}
+	return nil
 }
