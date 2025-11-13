@@ -13,9 +13,31 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-#  app:
-#    build: .
-#
+  migrations:
+    image: migrate/migrate:latest
+    container_name: reviewer-migrator
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations:ro
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://user:password@db:5432/reviewer_db?sslmode=disable"
+      - "up"
+    restart: "no"
+
+  app:
+    build: .
+    container_name: reviewer-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+
 
 volumes:
   postgres_data:
