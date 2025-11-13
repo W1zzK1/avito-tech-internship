@@ -1,0 +1,11 @@
+### GET request to example server
+POST http://localhost:8080/pullRequest/create
+Content-Type: application/json
+
+{
+  "pull_request_id": "pr-1002",
+  "pull_request_name": "Add search v2",
+  "author_id": "u1"
+}
+
+###

@@ -1,0 +1,9 @@
+### GET request to example server
+GET http://localhost:8080/users/1
+
+#Content-Type: application/json
+#{
+#"id": 1
+#}
+
+###

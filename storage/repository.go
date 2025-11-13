@@ -18,6 +18,19 @@ type Repository interface {
 	//Teams
 	AddTeam(team *domain.Team) error
 	GetTeamByName(name string) (*domain.Team, error)
+
+	//PullRequests
+	CreatePullRequest(pr *domain.PullRequest) error
+	GetPullRequestByID(prID string) (*domain.PullRequest, error)
+	MergePullRequest(prID string) error
+	PRExists(prID string) (bool, error)
+	AssignReviewers(prID string, reviewerIDs []string) error
+	GetPRReviewers(prID string) ([]string, error)
+	ReplaceReviewer(prID, oldReviewerID, newReviewerID string) error
+	GetUserAssignedPRs(userID string) ([]domain.PullRequestShort, error)
+	GetActiveTeamMembers(teamID string, excludeUserID string) ([]domain.User, error)
+	GetRandomActiveTeamMember(teamID string, excludeUserIDs []string) (*domain.User, error)
+	GetAuthorTeam(authorID string) (string, error)
 }
 
 type PostgresRepository struct {

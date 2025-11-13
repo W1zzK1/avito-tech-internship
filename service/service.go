@@ -14,41 +14,41 @@ func NewService(repo storage.Repository) *Service {
 }
 
 // Users
-func (service *Service) AddNewUser(user *domain.User) (*domain.User, error) {
-	user, err := service.repo.AddNewUser(user)
+func (s *Service) AddNewUser(user *domain.User) (*domain.User, error) {
+	user, err := s.repo.AddNewUser(user)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (service *Service) GetUser(id string) (*domain.User, error) {
-	user, err := service.repo.GetUserByID(id)
+func (s *Service) GetUser(id string) (*domain.User, error) {
+	user, err := s.repo.GetUserByID(id)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (service *Service) SetUserActive(userID string, isActive bool) (*domain.User, error) {
-	err := service.repo.SetUserActive(userID, isActive)
+func (s *Service) SetUserActive(userID string, isActive bool) (*domain.User, error) {
+	err := s.repo.SetUserActive(userID, isActive)
 	if err != nil {
 		return nil, err
 	}
-	return service.repo.GetUserByID(userID)
+	return s.repo.GetUserByID(userID)
 }
 
 // Teams
-func (service *Service) CreateNewTeam(team *domain.Team) error {
-	err := service.repo.AddTeam(team)
+func (s *Service) CreateNewTeam(team *domain.Team) error {
+	err := s.repo.AddTeam(team)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (service *Service) GetTeamByName(teamName string) (*domain.Team, error) {
-	team, err := service.repo.GetTeamByName(teamName)
+func (s *Service) GetTeamByName(teamName string) (*domain.Team, error) {
+	team, err := s.repo.GetTeamByName(teamName)
 	if err != nil {
 		return nil, err
 	}

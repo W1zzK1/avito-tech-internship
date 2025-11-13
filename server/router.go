@@ -40,6 +40,13 @@ func (s *Server) setupRouter() {
 		users.POST("/setIsActive", httpHandler.SetUserActive)
 	}
 
+	pullRequest := s.router.Group("/pullRequest")
+	{
+		pullRequest.POST("/create", httpHandler.CreatePullRequest)
+		pullRequest.POST("/merge", httpHandler.MergePullRequest)
+		pullRequest.POST("/reassign", httpHandler.ReassignReviewer)
+	}
+
 	s.router.GET("/health", func(c *gin.Context) {
 		if err := s.db.Ping(); err != nil {
 			c.JSON(500, gin.H{"status": "unhealthy"})
