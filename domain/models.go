@@ -3,11 +3,11 @@ package domain
 import "time"
 
 type User struct {
-	UserId   string `db:"id" json:"userId"`
+	UserId   string `db:"id" json:"user_id"`
 	Username string `db:"username" json:"username"`
 	IsActive bool   `db:"is_active" json:"isActive"`
 	TeamName string `db:"team_name" json:"teamName,omitempty"`
-	TeamId   int    `db:"team_id" json:"-"`
+	TeamId   string `db:"team_id" json:"-"`
 }
 
 type Team struct {
