@@ -27,9 +27,9 @@ func (s *Server) setupRouter() {
 	appService := service.NewService(repository)
 	httpHandler := NewHandler(appService)
 
-	teams := s.router.Group("/teams")
+	teams := s.router.Group("/team")
 	{
-		teams.POST("/add")
+		teams.POST("/add", httpHandler.createNewTeam)
 		teams.GET("/get")
 	}
 

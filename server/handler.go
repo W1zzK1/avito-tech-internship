@@ -1,6 +1,7 @@
 package server
 
 import (
+	"avito-tech-internship/domain"
 	"avito-tech-internship/service"
 	"encoding/json"
 	"fmt"
@@ -63,6 +64,32 @@ func (h *Handler) SetUserActive(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"user": user,
+	})
+}
+
+func (h *Handler) createNewTeam(c *gin.Context) {
+	var team domain.Team
+	body, _ := c.GetRawData()
+	if err := json.Unmarshal(body, &team); err != nil {
+		writeError(c, http.StatusBadRequest, "INVALID_JSON", fmt.Sprintf("Invalid JSON: %v", err))
+		return
+	}
+	err := h.service.CreateNewTeam(&team)
+	if err != nil {
+		if err.Error() == "TEAM_EXISTS" {
+			writeError(c, http.StatusBadRequest, "TEAM_EXISTS", "team_name already exists")
+			return
+		}
+		writeError(c, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error())
+		return
+	}
+
+	response := domain.Team{
+		TeamName: team.TeamName,
+		Members:  team.Members,
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"team": response,
 	})
 }
 

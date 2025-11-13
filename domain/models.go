@@ -11,7 +11,7 @@ type User struct {
 }
 
 type Team struct {
-	TeamName string  `json:"teamName,omitempty"`
+	TeamName string  `json:"team_name,omitempty"`
 	Members  []*User `json:"members"`
 }
 

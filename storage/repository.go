@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"strings"
 )
 
 type Repository interface {
@@ -13,7 +14,8 @@ type Repository interface {
 	GetUserByID(userId string) (*domain.User, error)
 	SetUserActive(userId string, isActive bool) error
 
-	//AddTeam()
+	//Teams
+	AddTeam(team *domain.Team) error
 }
 
 type PostgresRepository struct {
@@ -50,4 +52,43 @@ func (r *PostgresRepository) SetUserActive(userID string, iaActive bool) error {
 		return fmt.Errorf("user was not found")
 	}
 	return nil
+}
+
+// Teams
+func (r *PostgresRepository) AddTeam(team *domain.Team) error {
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Создаем команду (ID сгенерируется автоматически)
+	var teamID string
+	err = tx.QueryRow(
+		"INSERT INTO teams (name) VALUES ($1) RETURNING id",
+		team.TeamName,
+	).Scan(&teamID)
+
+	if err != nil {
+		// Проверяем на уникальность имени команды
+		if strings.Contains(err.Error(), "unique constraint") {
+			return errors.New("TEAM_EXISTS")
+		}
+		return err
+	}
+
+	// Создаем/обновляем пользователей
+	for _, member := range team.Members {
+		_, err := tx.Exec(`
+            INSERT INTO users (id, username, is_active, team_id) 
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (id) 
+            DO UPDATE SET username = $2, is_active = $3, team_id = $4
+        `, member.UserId, member.Username, member.IsActive, teamID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
