@@ -30,7 +30,7 @@ func (s *Server) setupRouter() {
 	teams := s.router.Group("/team")
 	{
 		teams.POST("/add", httpHandler.createNewTeam)
-		teams.GET("/get")
+		teams.GET("/get/:teamName", httpHandler.GetTeamByName)
 	}
 
 	users := s.router.Group("/users")

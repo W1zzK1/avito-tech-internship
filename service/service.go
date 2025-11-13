@@ -38,3 +38,11 @@ func (service *Service) CreateNewTeam(team *domain.Team) error {
 	}
 	return nil
 }
+
+func (service *Service) GetTeamByName(teamName string) (*domain.Team, error) {
+	team, err := service.repo.GetTeamByName(teamName)
+	if err != nil {
+		return nil, err
+	}
+	return team, nil
+}

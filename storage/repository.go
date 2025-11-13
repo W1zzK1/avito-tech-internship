@@ -16,6 +16,7 @@ type Repository interface {
 
 	//Teams
 	AddTeam(team *domain.Team) error
+	GetTeamByName(name string) (*domain.Team, error)
 }
 
 type PostgresRepository struct {
@@ -91,4 +92,39 @@ func (r *PostgresRepository) AddTeam(team *domain.Team) error {
 	}
 
 	return tx.Commit()
+}
+
+func (r *PostgresRepository) GetTeamByName(teamName string) (*domain.Team, error) {
+	var teamExists bool
+	err := r.db.Get(&teamExists, "SELECT exists(SELECT 1 FROM teams WHERE name = $1)", teamName)
+	if err != nil {
+		return nil, fmt.Errorf("database error: %w", err)
+	}
+	if !teamExists {
+		return nil, errors.New("team not found")
+	}
+
+	var members []*domain.User
+	query := `
+        SELECT 
+            u.id, 
+            u.username, 
+            u.is_active,
+            t.name as team_name,
+            u.team_id
+        FROM users u 
+        JOIN teams t ON u.team_id = t.id 
+        WHERE t.name = $1
+        ORDER BY u.username
+    `
+	err = r.db.Select(&members, query, teamName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get team members: %w", err)
+	}
+
+	team := &domain.Team{
+		TeamName: teamName,
+		Members:  members,
+	}
+	return team, nil
 }

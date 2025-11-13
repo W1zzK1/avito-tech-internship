@@ -93,6 +93,23 @@ func (h *Handler) createNewTeam(c *gin.Context) {
 	})
 }
 
+func (h *Handler) GetTeamByName(c *gin.Context) {
+	teamName := c.Param("teamName")
+	if teamName == "" {
+		writeError(c, http.StatusBadRequest, "MISSING_PARAM", "user id is required")
+		return
+	}
+
+	team, err := h.service.GetTeamByName(teamName)
+	if err != nil {
+		writeError(c, http.StatusNotFound, "NOT_FOUND", "resource not found")
+		return
+	}
+
+	c.JSON(http.StatusOK, team)
+
+}
+
 func writeError(c *gin.Context, status int, code, message string) {
 	errResponse := struct {
 		Error struct {
