@@ -1,8 +1,8 @@
 package service
 
 import (
-	"avito-tech-internship/domain"
-	"avito-tech-internship/storage"
+	"avito-tech-internship/internal/domain"
+	"avito-tech-internship/internal/storage"
 )
 
 type Service struct {
@@ -22,7 +22,7 @@ func (s *Service) AddNewUser(user *domain.User) (*domain.User, error) {
 	return user, nil
 }
 
-func (s *Service) GetUser(id string) (*domain.User, error) {
+func (s *Service) GetUserByID(id string) (*domain.User, error) {
 	user, err := s.repo.GetUserByID(id)
 	if err != nil {
 		return nil, err

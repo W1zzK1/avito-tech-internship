@@ -1,7 +1,6 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: reviewer-db
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -18,7 +17,6 @@ services:
 
   migrations:
     image: migrate/migrate:latest
-    container_name: reviewer-migrator
     depends_on:
       db:
         condition: service_healthy
@@ -32,7 +30,6 @@ services:
 
   app:
     build: .
-    container_name: reviewer-app
     ports:
       - "8080:8080"
     environment:

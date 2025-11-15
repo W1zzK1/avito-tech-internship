@@ -1,7 +1,7 @@
 package server
 
 import (
-	"avito-tech-internship/domain"
+	"avito-tech-internship/internal/domain"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"

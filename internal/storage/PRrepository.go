@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"avito-tech-internship/domain"
+	"avito-tech-internship/internal/domain"
 	"database/sql"
 	"errors"
 	"fmt"

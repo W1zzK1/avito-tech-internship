@@ -1,11 +1,12 @@
 package server
 
 import (
-	"avito-tech-internship/domain"
-	"avito-tech-internship/service"
+	"avito-tech-internship/internal/domain"
+	"avito-tech-internship/internal/service"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log/slog"
 	"net/http"
 	"strings"
 )
@@ -42,14 +43,14 @@ func (h *Handler) AddNewUser(c *gin.Context) {
 	c.JSON(http.StatusOK, createdUser)
 }
 
-func (h *Handler) GetUser(c *gin.Context) {
+func (h *Handler) GetUserByID(c *gin.Context) {
 	userID := c.Param("id")
 	if userID == "" {
 		writeError(c, http.StatusBadRequest, "MISSING_PARAM", "user id is required")
 		return
 	}
 
-	user, err := h.service.GetUser(userID)
+	user, err := h.service.GetUserByID(userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			writeError(c, http.StatusNotFound, "NOT_FOUND", "user not found")
@@ -143,5 +144,6 @@ func writeError(c *gin.Context, status int, code, message string) {
 	}{}
 	errResponse.Error.Message = message
 	errResponse.Error.Code = code
+	slog.ErrorContext(c, message, errResponse)
 	c.JSON(status, errResponse)
 }

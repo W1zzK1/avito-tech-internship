@@ -1,11 +1,12 @@
 package server
 
 import (
-	"avito-tech-internship/service"
-	"avito-tech-internship/storage"
+	"avito-tech-internship/internal/service"
+	"avito-tech-internship/internal/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"log/slog"
 )
 
 type Server struct {
@@ -18,6 +19,7 @@ func NewServer(db *sqlx.DB) *Server {
 		router: gin.Default(),
 		db:     db,
 	}
+	slog.Info("server initialized")
 	s.setupRouter()
 	return s
 }
@@ -36,7 +38,7 @@ func (s *Server) setupRouter() {
 	users := s.router.Group("/users")
 	{
 		users.POST("/addNew", httpHandler.AddNewUser)
-		users.GET("/users/:id", httpHandler.GetUser)
+		users.GET("/getById/:id", httpHandler.GetUserByID)
 		users.POST("/setIsActive", httpHandler.SetUserActive)
 	}
 

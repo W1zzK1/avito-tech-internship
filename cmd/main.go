@@ -1,10 +1,10 @@
 package main
 
 import (
-	"avito-tech-internship/server"
+	"avito-tech-internship/internal/server"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"log"
+	"log/slog"
 	"os"
 )
 
@@ -12,7 +12,7 @@ func main() {
 	dbURL := os.Getenv("DATABASE_URL")
 	db, err := sqlx.Connect("postgres", dbURL)
 	if err != nil {
-		log.Fatalf("could not connect to database: %v", err)
+		slog.Error("could not connect to database: %v", err)
 	}
 	defer db.Close()
 

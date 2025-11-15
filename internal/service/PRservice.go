@@ -1,7 +1,7 @@
 package service
 
 import (
-	"avito-tech-internship/domain"
+	"avito-tech-internship/internal/domain"
 	"errors"
 	"fmt"
 	"math/rand"
