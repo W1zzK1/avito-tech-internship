@@ -31,6 +31,11 @@ type Repository interface {
 	GetActiveTeamMembers(teamID string, excludeUserID string) ([]domain.User, error)
 	GetRandomActiveTeamMember(teamID string, excludeUserIDs []string) (*domain.User, error)
 	GetAuthorTeam(authorID string) (string, error)
+
+	//Stats
+	GetPRReviewersStats() ([]*domain.UserStats, error)
+	GetDetailedPRStats() ([]*domain.PRStats, error)
+	GetTeamStats() ([]*domain.TeamStats, error)
 }
 
 type PostgresRepository struct {
@@ -170,4 +175,86 @@ func (r *PostgresRepository) GetTeamByName(teamName string) (*domain.Team, error
 		Members:  members,
 	}
 	return team, nil
+}
+
+// Stats
+func (r *PostgresRepository) GetPRReviewersStats() ([]*domain.UserStats, error) {
+	query := `
+        SELECT 
+            u.id as user_id,
+            u.username,
+            t.name as team_name,
+            COUNT(prr.pull_request_id) as pr_count,
+            COUNT(CASE WHEN pr.status = 'MERGED' THEN 1 END) as merged_pr_count
+        FROM users u
+        JOIN teams t ON u.team_id = t.id
+        LEFT JOIN pull_request_reviewers prr ON u.id = prr.user_id
+        LEFT JOIN pull_requests pr ON prr.pull_request_id = pr.id
+        WHERE u.is_active = true
+        GROUP BY u.id, u.username, t.name
+        ORDER BY pr_count DESC
+    `
+
+	var stats []*domain.UserStats
+	err := r.db.Select(&stats, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get PR reviewers stats: %w", err)
+	}
+
+	return stats, nil
+}
+
+func (r *PostgresRepository) GetDetailedPRStats() ([]*domain.PRStats, error) {
+	query := `
+        SELECT 
+            pr.id as pull_request_id,
+            pr.name as pull_request_name,
+            pr.status,
+            pr.created_at,
+            pr.merged_at,
+            author.username as author_name,
+            author_team.name as author_team,
+            COUNT(prr.user_id) as reviewer_count,
+            STRING_AGG(reviewer.username, ', ') as reviewer_names
+        FROM pull_requests pr
+        JOIN users author ON pr.author_id = author.id
+        JOIN teams author_team ON author.team_id = author_team.id
+        LEFT JOIN pull_request_reviewers prr ON pr.id = prr.pull_request_id
+        LEFT JOIN users reviewer ON prr.user_id = reviewer.id
+        GROUP BY pr.id, pr.name, pr.status, pr.created_at, pr.merged_at, author.username, author_team.name
+        ORDER BY pr.created_at DESC
+    `
+
+	var stats []*domain.PRStats
+	err := r.db.Select(&stats, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get detailed PR stats: %w", err)
+	}
+
+	return stats, nil
+}
+
+func (r *PostgresRepository) GetTeamStats() ([]*domain.TeamStats, error) {
+	query := `
+        SELECT 
+            t.name as team_name,
+            COUNT(DISTINCT u.id) as member_count,
+            COUNT(DISTINCT pr.id) as authored_pr_count,
+            COUNT(DISTINCT prr.pull_request_id) as reviewed_pr_count,
+            COUNT(DISTINCT CASE WHEN pr.status = 'MERGED' THEN pr.id END) as merged_pr_count
+        FROM teams t
+        LEFT JOIN users u ON t.id = u.team_id AND u.is_active = true
+        LEFT JOIN pull_requests pr ON u.id = pr.author_id
+        LEFT JOIN pull_request_reviewers prr ON u.id = prr.user_id
+        GROUP BY t.name
+        ORDER BY reviewed_pr_count DESC
+    `
+
+	var stats []*domain.TeamStats
+	err := r.db.Select(&stats, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get team stats: %w", err)
+	}
+
+	return stats, nil
 }

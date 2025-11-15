@@ -47,3 +47,49 @@ type ReassignRequest struct {
 	PRID          string `json:"pull_request_id" binding:"required"`
 	OldReviewerID string `json:"old_reviewer_id" binding:"required"`
 }
+
+// stats
+type UserStats struct {
+	UserID        string `db:"user_id" json:"user_id"`
+	Username      string `db:"username" json:"username"`
+	TeamName      string `db:"team_name" json:"team_name"`
+	PRCount       int    `db:"pr_count" json:"pr_count"`
+	MergedPRCount int    `db:"merged_pr_count" json:"merged_pr_count"`
+}
+
+type PRStats struct {
+	PRID          string     `db:"pull_request_id" json:"pull_request_id"`
+	PRName        string     `db:"pull_request_name" json:"pull_request_name"`
+	Status        string     `db:"status" json:"status"`
+	CreatedAt     time.Time  `db:"created_at" json:"created_at"`
+	MergedAt      *time.Time `db:"merged_at" json:"merged_at,omitempty"`
+	AuthorName    string     `db:"author_name" json:"author_name"`
+	AuthorTeam    string     `db:"author_team" json:"author_team"`
+	ReviewerCount int        `db:"reviewer_count" json:"reviewer_count"`
+	ReviewerNames string     `db:"reviewer_names" json:"reviewer_names"`
+}
+
+type TeamStats struct {
+	TeamName        string `db:"team_name" json:"team_name"`
+	MemberCount     int    `db:"member_count" json:"member_count"`
+	AuthoredPRCount int    `db:"authored_pr_count" json:"authored_pr_count"`
+	ReviewedPRCount int    `db:"reviewed_pr_count" json:"reviewed_pr_count"`
+	MergedPRCount   int    `db:"merged_pr_count" json:"merged_pr_count"`
+}
+
+type StatsResponse struct {
+	UserStats []*UserStats  `json:"user_stats"`
+	PRStats   []*PRStats    `json:"pr_stats"`
+	TeamStats []*TeamStats  `json:"team_stats"`
+	Summary   *StatsSummary `json:"summary"`
+}
+
+type StatsSummary struct {
+	TotalUsers      int `json:"total_users"`
+	TotalTeams      int `json:"total_teams"`
+	TotalPRs        int `json:"total_prs"`
+	OpenPRs         int `json:"open_prs"`
+	MergedPRs       int `json:"merged_prs"`
+	TotalReviews    int `json:"total_reviews"`
+	AvgReviewsPerPR int `json:"avg_reviews_per_pr"`
+}

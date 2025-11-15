@@ -135,6 +135,16 @@ func (h *Handler) GetTeamByName(c *gin.Context) {
 
 }
 
+func (h *Handler) GetStats(c *gin.Context) {
+	stats, err := h.service.GetStats()
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error())
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"stats": stats,
+	})
+}
+
 func writeError(c *gin.Context, status int, code, message string) {
 	errResponse := struct {
 		Error struct {

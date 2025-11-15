@@ -49,6 +49,11 @@ func (s *Server) setupRouter() {
 		pullRequest.POST("/reassign", httpHandler.ReassignReviewer)
 	}
 
+	stats := s.router.Group("/stats")
+	{
+		stats.GET("getAllStats", httpHandler.GetStats)
+	}
+
 	s.router.GET("/health", func(c *gin.Context) {
 		if err := s.db.Ping(); err != nil {
 			c.JSON(500, gin.H{"status": "unhealthy"})
