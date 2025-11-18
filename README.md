@@ -21,3 +21,4 @@ docker-compose up --build
 | POST  |  /pullRequest/merge   |
 | POST  | /pullRequest/reassign |
 | GET   |  /stats/getAllStats   |
+| GET   |       /health         |
